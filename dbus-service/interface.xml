@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- If you keep the following DOCTYPE tag in your interface
+     specification, xmllint can fetch the DTD over the Internet
+     for validation automatically. -->
+<!DOCTYPE node PUBLIC
+  "-//freedesktop//DTD D-Bus Object Introspection 1.0//EN"
+  "http://standards.freedesktop.org/dbus/1.0/introspect.dtd">
+
+<node name="/GlobalValue">
+  <interface name="net.attiyat.GA">
+    <method name="authenticate">
+      <arg type="i" name="OK" direction="out"/>
+    </method>
+  </interface>
+</node>
+

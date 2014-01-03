@@ -1,0 +1,9 @@
+*.so
+*.o
+*.la
+*.lo
+*.gir
+*.typelib
+*/.libs/
+*~
+*.swp
