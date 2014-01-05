@@ -32,10 +32,12 @@ pam_token_pass (int num_msg, const struct pam_message **msg,
 static void
 graph_auth_pam_class_init(GraphAuthPamClass* gap_class){
 
+#ifdef DBUS_SERVICE
     //Install interscoption data
-    /*dbus_g_object_type_install_info(graph_auth_pam_TYPE,
+    dbus_g_object_type_install_info(graph_auth_pam_TYPE,
                                     &dbus_glib_graph_auth_pam_object_info);
-    */
+#endif
+
 }
 
 static void
