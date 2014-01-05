@@ -7,7 +7,7 @@
  * *
  * * The #GraphAuthPam is a class to authenticate a graph login.
  * */
-G_DEFINE_TYPE (GraphAuthPam, graph_auth_pam, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (GraphAuthPam, graph_auth_pam, G_TYPE_OBJECT)
 
 gboolean graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err);
 
@@ -30,18 +30,7 @@ pam_token_pass (int num_msg, const struct pam_message **msg,
 }
 
 static void
-graph_auth_pam_class_init(GraphAuthPamClass* ga_class){
-    int error = 0;
-
-    struct pam_conv* pam_c = g_malloc(sizeof(struct pam_conv));
-    
-    pam_c->conv = &pam_token_pass;
-    pam_c->appdata_ptr = ga_class;
-
-    //error = pam_start("graph", "reyad", pam_c, &(ga_class->pam_handle));
-    if(error != PAM_SUCCESS){
-        g_printerr("Error starting pam transaction\n");
-    }
+graph_auth_pam_class_init(GraphAuthPamClass* gap_class){
 
     //Install interscoption data
     /*dbus_g_object_type_install_info(graph_auth_pam_TYPE,
@@ -51,7 +40,17 @@ graph_auth_pam_class_init(GraphAuthPamClass* ga_class){
 
 static void
 graph_auth_pam_init(GraphAuthPam* self){
+    int error = 0;
+    GraphAuthPamPrivate* gapp = G_TYPE_INSTANCE_GET_PRIVATE(self, GRAPH_AUTH_PAM_TYPE, GraphAuthPamPrivate);
+    struct pam_conv* pam_c = g_malloc(sizeof(struct pam_conv));
+    
+    pam_c->conv = &pam_token_pass;
+    pam_c->appdata_ptr = "aaaaaaaa";
 
+    error = pam_start("graph", "reyad", pam_c, &(gapp->pam_handle));
+    if(error != PAM_SUCCESS){
+        g_printerr("Error starting pam transaction\n");
+    }
 }
 
 /**
@@ -85,7 +84,8 @@ graph_auth_pam_finalize(GObject *object){
  **/
 gboolean 
 graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err){
-    GraphAuthPamClass* ga_class;
+    GraphAuthPamPrivate* gapp = graph_auth_pam_get_instance_private(self);
+
     GError* error;
     int e = 0;
     char* user = g_malloc(255);
@@ -96,32 +96,13 @@ graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err){
     pam_handle_t* pam_handle = NULL;
 
 
-    struct pam_conv* pam_c = g_malloc(sizeof(struct pam_conv));
     *err = 0;
 
-    ga_class = GRAPH_AUTH_PAM_CLASS(G_OBJECT_GET_CLASS(self));
-    if(ga_class == NULL){
-        
-        g_printerr("Error getting graph auth class.\n" );
-        return FALSE;
-    }
-
-//    pam_handle = ga_class->pam_handle;
-
-    
-    pam_c->conv = &pam_token_pass;
-    pam_c->appdata_ptr = auth_token;
-
-    error = pam_start("graph", "reyad", pam_c, &(pam_handle));
-    if(error != PAM_SUCCESS){
-        g_printerr("Error starting pam transaction\n");
-    }
+    pam_handle = gapp->pam_handle;
     if(pam_handle == NULL){
-        
-        g_printerr("Error getting PAM.!!!!!!!!\n" );
+        g_printerr("Error getting PAM!\n" );
         return FALSE;
     }
-
 
     e = pam_get_item(pam_handle, PAM_SERVICE, (void*)&service);
     if(e != PAM_SUCCESS){

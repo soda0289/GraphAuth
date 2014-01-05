@@ -10,6 +10,12 @@
 
 typedef struct _GraphAuthPam GraphAuthPam;
 typedef struct _GraphAuthPamClass GraphAuthPamClass;
+typedef struct _GraphAuthPamPrivate GraphAuthPamPrivate;
+
+struct _GraphAuthPamPrivate{
+    pam_handle_t* pam_handle;
+};
+
 
 struct _GraphAuthPam {
     GObject parent_instance;
@@ -24,5 +30,6 @@ GType graph_auth_pam_get_type (void);
 GraphAuthPam* graph_auth_pam_new();
 
 int graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err);
+
 #endif
 

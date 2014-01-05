@@ -35,7 +35,7 @@ GraphAuth.gir: libgraphauth.la
 
 
 clean: 
-	rm *.lo
-	rm libgraphauth.la 
-	rm *.gir
-	rm *.typelib
+	-rm *.lo
+	-rm libgraphauth.la 
+	-rm *.gir
+	-rm *.typelib
