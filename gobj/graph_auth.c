@@ -22,12 +22,21 @@ const char* PAM_SERVICE_NAME = "graph";
 int
 pam_token_pass (int num_msg, const struct pam_message **msg,
                     struct pam_response **resp, void *appdata_ptr){
+    
+    int i;
+    GraphAuthPam* self = (GraphAuthPam*) appdata_ptr;
+    GraphAuthPamClass* klass = GRAPH_AUTH_PAM_CLASS (G_OBJECT_GET_CLASS(self));
+    for(i = 0;i < num_msg;i++){
+        struct pam_response* r = resp[i];
+        struct pam_message* m = msg[i];
 
-    for(num_msg--;num_msg >= 0;num_msg--){
-        struct pam_response* r;
-        r = resp[num_msg];
-        if(r != NULL){
-            r->resp = appdata_ptr;
+        if(m != NULL){
+            if(strncmp(m->msg, "auth_token", 10 ) == 0){
+            g_signal_emit (self, klass->new_msg_sigid,0, m->msg, r);
+                if(r != NULL){
+                    r->resp = self->auth_token;
+                }
+            }
         }
     }
 
@@ -35,7 +44,19 @@ pam_token_pass (int num_msg, const struct pam_message **msg,
 }
 
 static void
-graph_auth_pam_class_init(GraphAuthPamClass* gap_class){
+graph_auth_pam_class_init(GraphAuthPamClass* klass){
+
+    klass->new_msg_sigid = g_signal_new("new-message",
+                                         GRAPH_AUTH_PAM_TYPE,
+                                         G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,//g_cclosure_marshal_VOID__STRING,
+                                         G_TYPE_STRING,
+                                         1,
+                                         G_TYPE_STRING);
+
 
 #ifdef DBUS_SERVICE
     //Install interscoption data
@@ -58,7 +79,7 @@ graph_auth_pam_init(GraphAuthPam* self){
     cuserid(username);
 
     pam_c->conv = &pam_token_pass;
-    pam_c->appdata_ptr = "aaaaaaaa";
+    pam_c->appdata_ptr = self;
 
     g_print("UID: %d\n", uid);
 
@@ -118,6 +139,8 @@ graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err){
         g_printerr("Error getting PAM!\n" );
         return FALSE;
     }
+
+    self->auth_token = auth_token;
 
     e = pam_get_item(pam_handle, PAM_SERVICE, (void*)&service);
     if(e != PAM_SUCCESS){

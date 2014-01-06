@@ -19,10 +19,14 @@ struct _GraphAuthPamPrivate{
 
 struct _GraphAuthPam {
     GObject parent_instance;
+
+    gchar* auth_token;
+    gchar* old_auth_token;
 };
 
 struct _GraphAuthPamClass {
     GObjectClass parent_class;
+    guint new_msg_sigid;
 };
 
 GType graph_auth_pam_get_type (void);
