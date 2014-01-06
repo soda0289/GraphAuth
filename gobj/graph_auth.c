@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+
 #include "graph_auth.h"
 /**
  * * SECTION: graph-auth
@@ -14,6 +16,9 @@ gboolean graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint
 
 
 #include <security/pam_appl.h>
+
+const char* PAM_SERVICE_NAME = "graph";
+
 int
 pam_token_pass (int num_msg, const struct pam_message **msg,
                     struct pam_response **resp, void *appdata_ptr){
@@ -43,13 +48,21 @@ graph_auth_pam_class_init(GraphAuthPamClass* gap_class){
 static void
 graph_auth_pam_init(GraphAuthPam* self){
     int error = 0;
+
+    uid_t uid = getuid();
+    char username[0xFF];
+
     GraphAuthPamPrivate* gapp = G_TYPE_INSTANCE_GET_PRIVATE(self, GRAPH_AUTH_PAM_TYPE, GraphAuthPamPrivate);
     struct pam_conv* pam_c = g_malloc(sizeof(struct pam_conv));
-    
+   
+    cuserid(username);
+
     pam_c->conv = &pam_token_pass;
     pam_c->appdata_ptr = "aaaaaaaa";
 
-    error = pam_start("graph", "reyad", pam_c, &(gapp->pam_handle));
+    g_print("UID: %d\n", uid);
+
+    error = pam_start(PAM_SERVICE_NAME, username, pam_c, &(gapp->pam_handle));
     if(error != PAM_SUCCESS){
         g_printerr("Error starting pam transaction\n");
     }
