@@ -13,11 +13,12 @@ let color = new Clutter.Color({
 });
 stage.set_background_color(color);
 stage.title = "graphAuth";
-stage.set_size(520,520);
+stage.set_size(520,550);
 stage.connect("destroy", Clutter.main_quit);
 
 
-let ga = new GraphAuth.graphAuth(stage);
+let ga = new GraphAuth.graphAuth();
+stage.add_child(ga.get_actor());
 
 ga.show();
 stage.show();

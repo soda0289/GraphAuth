@@ -143,7 +143,7 @@ const Graph = function(size, style){
 const graphAuth = new Lang.Class({
     Name: "graphAuth",
 
-    _init: function(parentRoot){
+    _init: function(){
         //PAM authentication gobject
         //new-message signal is PAM conversation
         this.pam_auth = new GraphAuthIntro.Pam();
@@ -151,8 +151,8 @@ const graphAuth = new Lang.Class({
 
         this.key = null;
 
-        this.width = 520;
-        this.height = 520;
+        this.width = 420;
+        this.height = 420;
 
         this.first_vertex = null;
         this.last_vertex = null;
@@ -162,17 +162,21 @@ const graphAuth = new Lang.Class({
         this.canvas.set_size(this.width, this.height);
         this.canvas.connect("draw", Lang.bind(this, this._draw_graph));
 
-        this.actor = new Clutter.Actor();
-        this.actor.set_size(this.width, this.height);
-        this.actor.set_content(this.canvas);
+        this.canvas_actor = new Clutter.Actor();
+        this.canvas_actor.set_size(this.width, this.height);
+        this.canvas_actor.set_content(this.canvas);
 
         this.text = new Clutter.Text();
         this.text.set_text("Swipe password:");
 
-        if(parentRoot != null){
-             parentRoot.add_child(this.actor);
-             parentRoot.add_child(this.text);
-        }
+        this.grid = new Clutter.GridLayout();
+
+        this.actor = new Clutter.Actor();
+        this.actor.set_layout_manager(this.grid);
+
+        this.grid.attach(this.canvas_actor, 0, 0, 1, 1);
+        this.grid.attach(this.text, 0, 1, 1, 1);
+
         let size = {
             x: 3,
             y: 3
@@ -204,6 +208,10 @@ const graphAuth = new Lang.Class({
         this.canvas.invalidate();
 
     
+    },
+
+    get_actor: function(){
+        return this.actor;
     },
 
     _draw_graph: function (canvas, cr, width, height){
