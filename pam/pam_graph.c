@@ -108,7 +108,10 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t* pamh, int flags, int argc, cons
         }
 
         printf("GRAPH AUTH: Got conversation response %s\n", pam_resps[0].resp);
-        auth_token = strndup(pam_resps[0].resp, strlen(pam_resps[0].resp));
+
+        if(pam_resps[0].resp != NULL){
+            auth_token = strndup(pam_resps[0].resp, strlen(pam_resps[0].resp));
+        }
     }
 
     printf("GRAPH AUTH: Auth Token: %s\n", auth_token);
@@ -119,7 +122,7 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t* pamh, int flags, int argc, cons
 
     printf("GRAPH AUTH: Crypt Auth Token: %s\n", crypt_auth_token);
 
-    if(strncmp(password, crypt_auth_token, 255) != 0){
+    if(crypt_auth_token == NULL || strncmp(password, crypt_auth_token, 255) != 0){
         printf("GRAPH AUTH: FAILED\n");
         return PAM_AUTH_ERR;
     }
