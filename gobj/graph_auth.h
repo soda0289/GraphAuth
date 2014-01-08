@@ -33,7 +33,7 @@ GType graph_auth_pam_get_type (void);
 
 GraphAuthPam* graph_auth_pam_new();
 
-int graph_auth_pam_authenticate(GraphAuthPam* self, gchar* auth_token, gint* err);
+gint graph_auth_pam_authenticate(GraphAuthPam* self, gint* err);
 
 #endif
 

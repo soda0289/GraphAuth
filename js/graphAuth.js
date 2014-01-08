@@ -144,7 +144,13 @@ const graphAuth = new Lang.Class({
     Name: "graphAuth",
 
     _init: function(parentRoot){
+        //PAM authentication gobject
+        //new-message signal is PAM conversation
+        this.pam_auth = new GraphAuthIntro.Pam();
+        this.pam_auth.connect("new-message", Lang.bind(this, this._new_auth_message));
+
         this.key = null;
+
         this.width = 520;
         this.height = 520;
 
@@ -160,8 +166,12 @@ const graphAuth = new Lang.Class({
         this.actor.set_size(this.width, this.height);
         this.actor.set_content(this.canvas);
 
+        this.text = new Clutter.Text();
+        this.text.set_text("Swipe password:");
+
         if(parentRoot != null){
              parentRoot.add_child(this.actor);
+             parentRoot.add_child(this.text);
         }
         let size = {
             x: 3,
@@ -240,6 +250,12 @@ const graphAuth = new Lang.Class({
         return false;
     },
 
+    _new_auth_message: function (ev, msg){
+        print("MSG: " + msg);
+
+        return this.key.toString();
+    },
+
     _check_mouse_collision: function(){
         let x = Math.floor(this.mouse_vertex.position.x * this._graph.size.x)
         let y = Math.floor(this.mouse_vertex.position.y * this._graph.size.y)
@@ -275,11 +291,15 @@ const graphAuth = new Lang.Class({
 
         if(ev.type() == Clutter.EventType.TOUCH_END || ev.type() == Clutter.EventType.LEAVE){
             let err = 0;
-            this._generate_key();
+            let status = 0;
 
-            let pam_auth = new GraphAuthIntro.Pam();
-            pam_auth.authenticate(this.key.toString(), err);
-            print("KEY: " + this.key + " err " + err);
+            this._generate_key();
+            status = this.pam_auth.authenticate(this.key.toString());
+            if(status[0] == 1){
+                this.text.set_text("Authenticated!");
+            }else{
+                this.text.set_text("Authentication Failed. Error code" + status.toString());
+            }
 
             this._graph.reset();
             this.last_vertex = null; 
@@ -299,7 +319,5 @@ const graphAuth = new Lang.Class({
     show: function(){
         this.actor.show();
     }
-
-
 
 });
