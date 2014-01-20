@@ -1,7 +1,8 @@
 const Lang = imports.lang;
+const Signals = imports.signals
+
 const Clutter = imports.gi.Clutter;
 const Cairo = imports.cairo;
-const GraphAuthIntro = imports.gi.GraphAuth;
 
 const Graph = function(size, style){
     this.size = size;
@@ -140,19 +141,15 @@ const Graph = function(size, style){
     };
 };
 
-const graphAuth = new Lang.Class({
+const GraphAuth = new Lang.Class({
     Name: "graphAuth",
 
     _init: function(){
-        //PAM authentication gobject
-        //new-message signal is PAM conversation
-        this.pam_auth = new GraphAuthIntro.Pam();
-        this.pam_auth.connect("new-message", Lang.bind(this, this._new_auth_message));
 
         this.key = null;
 
-        this.width = 420;
-        this.height = 420;
+        this.width = 660;
+        this.height = 660;
 
         this.first_vertex = null;
         this.last_vertex = null;
@@ -166,16 +163,7 @@ const graphAuth = new Lang.Class({
         this.canvas_actor.set_size(this.width, this.height);
         this.canvas_actor.set_content(this.canvas);
 
-        this.text = new Clutter.Text();
-        this.text.set_text("Swipe password:");
-
-        this.grid = new Clutter.GridLayout();
-
-        this.actor = new Clutter.Actor();
-        this.actor.set_layout_manager(this.grid);
-
-        this.grid.attach(this.canvas_actor, 0, 0, 1, 1);
-        this.grid.attach(this.text, 0, 1, 1, 1);
+        this.actor = this.canvas_actor;
 
         let size = {
             x: 3,
@@ -198,16 +186,14 @@ const graphAuth = new Lang.Class({
         this.mouse_vertex.selected = false;
         this.mouse_vertex.width = 0.0;
 
-        this.actor.connect("motion-event", Lang.bind(this, this._update_mouse_vertex));
-        this.actor.connect("touch-event", Lang.bind(this, this._update_mouse_vertex));
-        this.actor.connect("leave-event", Lang.bind(this, this._update_mouse_vertex));
-        this.actor.set_reactive(true);
+        this.canvas_actor.connect("motion-event", Lang.bind(this, this._update_mouse_vertex));
+        this.canvas_actor.connect("touch-event", Lang.bind(this, this._update_mouse_vertex));
+        this.canvas_actor.connect("leave-event", Lang.bind(this, this._update_mouse_vertex));
+        this.canvas_actor.set_reactive(true);
 
         
         //Set Canvcas to invalid to force inital draw
         this.canvas.invalidate();
-
-    
     },
 
     get_actor: function(){
@@ -221,6 +207,7 @@ const graphAuth = new Lang.Class({
         cr.restore ();
         cr.setOperator (Cairo.Operator.OVER);
         cr.scale (width, height);
+       
         cr.setLineCap (Cairo.LineCap.ROUND);
         
         this._graph.draw(canvas, cr, width, height);
@@ -238,15 +225,16 @@ const graphAuth = new Lang.Class({
         /* greater than the number of vertices      */
 
         this.key = 0;
-
-        let edge = this.first_vertex.edge;
-        if(edge != null){ 
-            let max = this._graph.size.x * this._graph.size.y;
-            for(let i = 0; i < max && edge != null;i++){
-                this.key += edge.src.index * Math.pow(max, i);
-                edge = edge.dest.edge;
+        if(this.first_vertex != null){
+            let edge = this.first_vertex.edge;
+            if(edge != null){ 
+                let max = this._graph.size.x * this._graph.size.y;
+                for(let i = 0; i < max && edge != null;i++){
+                    this.key += edge.src.index * Math.pow(max, i);
+                    edge = edge.dest.edge;
+                }
             }
-        } 
+        }
 
     },
 
@@ -268,6 +256,10 @@ const graphAuth = new Lang.Class({
         let x = Math.floor(this.mouse_vertex.position.x * this._graph.size.x)
         let y = Math.floor(this.mouse_vertex.position.y * this._graph.size.y)
         let vertex = this._graph.get_vertex(x,y);
+        if(vertex == undefined){
+            print("Error no vertex found at X: " + " Y: " + y);
+            return false;
+        }
 
         //Check Collision
         if(Math.abs(vertex.distance_to(this.mouse_vertex)) < 0.08 && vertex.selected == false){
@@ -291,33 +283,27 @@ const graphAuth = new Lang.Class({
 
         ev.get_position(mouse);
 
-        let aw = actor.get_width();
-        let ah = actor.get_height();
-        
+        let aw = this.canvas_actor.get_width();
+        let ah = this.canvas_actor.get_height();
+
         //Do some math and get the mouse relative to the actor instead of the stage
-        let aaa = actor.transform_stage_point(mouse.x, mouse.y);
+        let aaa = this.canvas_actor.transform_stage_point(mouse.x, mouse.y);
 
         if(ev.type() == Clutter.EventType.TOUCH_END || ev.type() == Clutter.EventType.LEAVE){
             let err = 0;
             let status = 0;
 
             this._generate_key();
-            status = this.pam_auth.authenticate(this.key.toString());
-            if(status[0] == 1){
-                this.text.set_text("Authenticated!");
-            }else{
-                this.text.set_text("Authentication Failed. Error code" + status.toString());
-            }
+            this.emit('next');
 
             this._graph.reset();
             this.last_vertex = null; 
         }else{
-                this.mouse_vertex.position.x = aaa[1] / aw;
-                this.mouse_vertex.position.y = aaa[2] / ah;
+            this.mouse_vertex.position.x = aaa[1] / aw;
+            this.mouse_vertex.position.y = aaa[2] / ah;
 
             this._check_mouse_collision();
         }
-
         //ReDraw
         this.canvas.invalidate();
 
@@ -326,6 +312,13 @@ const graphAuth = new Lang.Class({
 
     show: function(){
         this.actor.show();
+    },
+
+    clear: function(){
+        if(this.graph != undefined){
+            this.graph.reset();
+        }
     }
 
 });
+Signals.addSignalMethods(GraphAuth.prototype);

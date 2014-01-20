@@ -79,40 +79,11 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t* pamh, int flags, int argc, cons
      
     printf("GRAPH AUTH: USER Pasword: %s\n", password);
 
-    status =  pam_get_authtok(pamh, PAM_AUTHTOK, (const void**) &auth_token, "Password: ");
+    status =  pam_get_authtok(pamh, PAM_AUTHTOK, (const void**) &auth_token, "GraphAuthToken: ");
     if(status != PAM_SUCCESS){
-        int ret;
-        struct pam_conv* conv;
-        const struct pam_message* pam_msgs = NULL;
-        struct pam_response* pam_resps = malloc(1 * sizeof(struct pam_response));
-        struct pam_message pam_msg = {
-            .msg_style = PAM_PROMPT_ECHO_OFF,
-            .msg = "auth_token"
-        };
-
-        pam_msgs = &pam_msg;
-
-        ret = pam_get_item(pamh, PAM_CONV, (void*)&conv);
-        if(ret != PAM_SUCCESS){
-            return ret;
-        }
-
-        //Call PAM conversation function in application
-        if(conv->conv == NULL){
-            return -33;
-        }
-
-        ret = conv->conv(1, &pam_msgs, &pam_resps, conv->appdata_ptr);
-        if(ret != PAM_SUCCESS){
-            return ret;
-        }
-
-        printf("GRAPH AUTH: Got conversation response %s\n", pam_resps[0].resp);
-
-        if(pam_resps[0].resp != NULL){
-            auth_token = strndup(pam_resps[0].resp, strlen(pam_resps[0].resp));
-        }
+        return PAM_AUTH_ERR;
     }
+
 
     printf("GRAPH AUTH: Auth Token: %s\n", auth_token);
 
@@ -136,6 +107,9 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t* pamh, int flags, int argc, const cha
         return PAM_SUCCESS;
 }
 
+PAM_EXTERN int pam_sm_acct_mgmt (pam_handle_t* pamh, int flags, int argc, const char** argv){
+    return PAM_SUCCESS;
+}
 PAM_EXTERN int pam_sm_chauthtok(pam_handle_t* pamh, int flags, int argc, const char** argv){
     return PAM_AUTHTOK_ERR;
 }
