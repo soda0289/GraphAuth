@@ -1,10 +1,12 @@
 const Clutter = imports.gi.Clutter;
-imports.searchPath.unshift("./");
-const GraphAuth = imports.graphAuth;
+const Lang = imports.lang;
 
-function on_next(){
+const GraphAuth = imports.gdm.graphAuth;
+const GraphAuthPam = imports.gi.GraphAuth;
 
-            status = pam_auth.authenticate(this.key.toString());
+function begin_auth(pam_auth){
+            let err = 0;
+            let status = pam_auth.authenticate(err);
             if(status[0] == 1){
                 text.set_text("Authenticated!");
             }else{
@@ -12,28 +14,49 @@ function on_next(){
            } 
 }
 
-Clutter.init(null, 0);
+function new_auth_message(){
+    this.show();
+    
+    Clutter.main();
 
-let stage = new Clutter.Stage();
-let color = new Clutter.Color({
-        red : 150,
-        green : 150,
-        blue : 150,
-    alpha: 255
-});
-stage.set_background_color(color);
-stage.title = "graphAuth";
-stage.set_size(520,550);
-stage.connect("destroy", Clutter.main_quit);
+    return ga.key.toString();
+}
 
-//PAM authentication gobject
-//new-message signal is PAM conversation
-pam_auth = new GraphAuthIntro.Pam();
-pam_auth.connect("new-message", Lang.bind(this, this._new_auth_message));
+function setup_stage(width, height){
+    Clutter.init(null, 0);
 
-let ga = new GraphAuth.graphAuth();
+    let stage = new Clutter.Stage();
+    let color = new Clutter.Color({
+            red : 150,
+            green : 150,
+            blue : 150,
+        alpha: 255
+    });
+    stage.set_background_color(color);
+    stage.title = "graphAuth";
+    stage.set_size(width, height);
+    stage.connect("destroy", Clutter.main_quit);
+
+    return stage;
+}
+
+//Setup window that contaings Clutter stage
+let stage = setup_stage(620,660);
+stage.show();
+
+//New graphAuth actor used to ask user for code
+let ga = new GraphAuth.GraphAuth();
+ga.connect("next", Clutter.main_quit);
+ga.actor.hide();
 stage.add_child(ga.get_actor());
 
-ga.show();
-stage.show();
-Clutter.main();
+let text = new Clutter.Text();
+
+//PAM authentication gobject
+let pam_auth = new GraphAuthPam.Pam();
+//new-message signal is PAM conversation
+//we show the graphAuth actor and wait for user to swipe code.
+pam_auth.connect("new-message", Lang.bind(ga, new_auth_message));
+
+begin_auth(pam_auth);
+

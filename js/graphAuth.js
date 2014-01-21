@@ -310,6 +310,10 @@ const GraphAuth = new Lang.Class({
         return false;   
     },
 
+    hide: function(){
+        this.actor.hide();
+    },
+
     show: function(){
         this.actor.show();
     },
