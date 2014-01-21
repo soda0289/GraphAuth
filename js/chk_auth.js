@@ -11,6 +11,7 @@ function begin_auth(pam_auth){
                 text.set_text("Authenticated!");
             }else{
                 text.set_text("Authentication Failed. Error code" + status.toString());
+                begin_auth(pam_auth);
            } 
 }
 

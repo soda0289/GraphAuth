@@ -35,5 +35,6 @@ GraphAuthPam* graph_auth_pam_new();
 
 gint graph_auth_pam_authenticate(GraphAuthPam* self, gint* err);
 
-#endif
+gint graph_auth_pam_chauthtok(GraphAuthPam* self, gint* err);
 
+#endif

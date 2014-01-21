@@ -117,9 +117,9 @@ graph_auth_pam_finalize(GObject *object){
 
 /**
  * graph_auth_pam_authenticate:
- * @self: Graph Auth instance
+ * @self: graph auth instance
  * @err: (inout): status code
- * Returns: The PAM error code from authenticating 
+ * returns: the pam error code from authenticating 
  **/
 gint 
 graph_auth_pam_authenticate(GraphAuthPam* self, gint* err){
@@ -169,4 +169,34 @@ graph_auth_pam_authenticate(GraphAuthPam* self, gint* err){
     *err = 1;
     
     return TRUE;
+}
+
+/**
+ * graph_auth_pam_chauthtok:
+ * @self: graph auth instance
+ * @err: (inout): status code
+ * returns: the pam error code from changing the auth token
+ **/
+gint 
+graph_auth_pam_chauthtok(GraphAuthPam* self, gint* err){
+    GraphAuthPamPrivate* gapp = graph_auth_pam_get_instance_private(self);
+
+    int e;
+    pam_handle_t* pam_handle = NULL;
+
+
+    *err = 0;
+
+    pam_handle = gapp->pam_handle;
+    if(pam_handle == NULL){
+        g_printerr("Error getting PAM!\n" );
+        return FALSE;
+    }
+
+    e = pam_chauthtok(pam_handle, NULL);
+    if(e != PAM_SUCCESS){
+        g_printerr("Error changing authentication token.\n ERROR  NUM %d\n PAM Error %s\n", e, pam_strerror(pam_handle, e));
+        return FALSE;
+    }
+    return 0;
 }
