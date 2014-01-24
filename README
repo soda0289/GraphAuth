@@ -1,1 +1,9 @@
-Graphical pattern login method for GNOME Display Manager.
+GraphAuth
+Graph (pattern) authentication method for GNOME Shell.
+
+pam/ - PAM for GraphAuth. Supports authentication and changing password
+
+pam_gobject/ - GObject used to interface with the GraphAuth PAM. 
+It is introspected to support use with JavaScript.
+
+js/ - JavaScript code that can be used to authticate users and change thier passwords.
