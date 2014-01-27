@@ -14,7 +14,7 @@ function setup_stage(width, height){
         alpha: 255
     });
     stage.set_background_color(color);
-    stage.title = "GraphAuth - Check Authentication";
+    stage.title = "GraphAuth - Change Graph Token";
     stage.set_size(width, height);
     stage.connect("destroy", Clutter.main_quit);
 
@@ -31,4 +31,4 @@ let graphAuthPrompt = new GraphAuthPrompt.GraphAuthPrompt();
 stage.add_child(graphAuthPrompt.get_actor());
 
 //Begin Authentication for current user
-graphAuthPrompt.begin_auth();
+graphAuthPrompt.begin_chauthtok();

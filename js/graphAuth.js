@@ -200,6 +200,10 @@ const GraphAuth = new Lang.Class({
         return this.actor;
     },
 
+	get_key: function() {
+		return this.key.toString();
+	},
+
     _draw_graph: function (canvas, cr, width, height){
         cr.save ();
         cr.setOperator (Cairo.Operator.CLEAR);
