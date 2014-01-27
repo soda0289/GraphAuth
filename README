@@ -1,13 +1,16 @@
 GraphAuth
-Graph (pattern) authentication method for GNOME Shell.
+Graph (pattern) authentication method for GNOME Shell. 
+It is designed for tablet/mobile devices that don't have 
+an attached keyboard or mouse.
+
 
 pam/ - PAM service module for GraphAuth. Supports authentication and changing passwords
 
 pam_gobject/ - GObject used to interface with the GraphAuth PAM service module (pam_graph.so). 
 It is introspected to support an API binding in JavaScript.
 
-js/ - The graphical code used to prompt the user for thier password. 
+js/ - The graphical code used to prompt the user for their password. 
 
-passwd/ - The password setting and manipulating wrapper. This code will comiple as an executable 
-and have the setuid flag. This allows for a non-root user to change thier own password. Something
+passwd/ - The password setting and manipulating wrapper. This code will compile as an executable 
+and have the SETUID flag. This allows for a non-root user to change their own password. Something
 gjs can't do.
