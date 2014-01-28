@@ -23,6 +23,7 @@
 
 #include <security/pam_modules.h>
 
+#define HASH_SALT "rew8235483"
 #define GRAPH_AUTH_TOKEN_FILE "/etc/graph_passwd"
 
 //Binary flags for modes
@@ -116,9 +117,13 @@ int access_token_file(const char* username, const char** password_ptr, file_mode
     return PAM_SUCCESS; 
 }
 
+char* hash_plain_password(const char* in){
+        return crypt(in, HASH_SALT); 
+}
+
 int set_user_pass(const char* username, const char* password){
     int status = 0;
-
+	password = hash_plain_password(password);
     status = access_token_file(username, &password, WRITE_TOKEN);
 
     return status;
@@ -161,9 +166,9 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t* pamh, int flags, int argc, cons
 
 
     printf("GRAPH AUTH: Auth Token: %s\n", auth_token);
-
+	
     if(auth_token != NULL){
-        crypt_auth_token = crypt(auth_token, "rew8235483"); 
+		crypt_auth_token = hash_plain_password(auth_token);
     }
 
     printf("GRAPH AUTH: Crypt Auth Token: %s\n", crypt_auth_token);
