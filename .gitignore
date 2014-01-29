@@ -17,5 +17,8 @@ config.sub
 config.guess
 config.h.in
 Makefile.in
+/Makefile.in
 missing
 ltmain.sh
+/config/
+/autom4te.cache/
