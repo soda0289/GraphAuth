@@ -2,7 +2,7 @@ CC=gcc
 PAM_GRAPH = pam_graph.so
 
 #Install in security directory
-libdir += security
+libdir = $(PAMDIR) 
 
 pkglib_LTLIBRARIES = pam_graph.la
 
