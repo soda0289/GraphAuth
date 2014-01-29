@@ -7,3 +7,15 @@
 */.libs/
 *~
 *.swp
+/m4/
+*.m4
+*.guess
+install-sh
+depcomp
+configure
+config.sub
+config.guess
+config.h.in
+Makefile.in
+missing
+ltmain.sh
