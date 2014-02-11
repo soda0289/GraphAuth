@@ -1,5 +1,4 @@
 NULL = 
-GLIB_COMPILE_RESOURCES = glib-compile-resources
 
 js_resource_files = $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=$(srcdir) --generate-dependencies $(srcdir)/js-resources.gresource.xml)
 js-resources.h: js-resources.gresource.xml $(js_resource_files)

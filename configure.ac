@@ -11,6 +11,8 @@ AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz foreign])
 
 LT_INIT([])
 
+PKG_PROG_PKG_CONFIG([0.22])
+
 #Check for PAM
 AC_CHECK_HEADERS([security/pam_appl.h], [],
 	[AC_MSG_ERROR([[PAM header files not found, install libpam-dev.]])])
@@ -32,6 +34,8 @@ AC_ARG_WITH(pam-dir,
             esac])
 AC_MSG_NOTICE([PAM installation path $PAMDIR])
 
+GLIB_COMPILE_RESOURCES=`$PKG_CONFIG --variable glib_compile_resources gio-2.0`
+AC_SUBST(GLIB_COMPILE_RESOURCES)
 
 AC_CONFIG_FILES([
 	Makefile

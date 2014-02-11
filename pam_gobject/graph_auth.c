@@ -3,7 +3,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-
+#include <pwd.h>
 #include "graph_auth.h"
 /**
  * * SECTION: graph-auth
@@ -76,18 +76,20 @@ graph_auth_pam_init(GraphAuthPam* self){
 
     uid_t uid = getuid();
     char username[0xFF];
+	struct passwd* pwd;
 
     GraphAuthPamPrivate* gapp = G_TYPE_INSTANCE_GET_PRIVATE(self, GRAPH_AUTH_PAM_TYPE, GraphAuthPamPrivate);
     struct pam_conv* pam_c = g_malloc(sizeof(struct pam_conv));
    
-    cuserid(username);
+	pwd = getpwuid(uid);
+
 
     pam_c->conv = &pam_token_pass;
     pam_c->appdata_ptr = self;
 
     g_print("UID: %d\n", uid);
 
-    error = pam_start(PAM_SERVICE_NAME, username, pam_c, &(gapp->pam_handle));
+    error = pam_start(PAM_SERVICE_NAME, pwd->pw_name, pam_c, &(gapp->pam_handle));
     if(error != PAM_SUCCESS){
         g_printerr("Error starting pam transaction\n");
     }

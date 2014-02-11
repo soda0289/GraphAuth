@@ -67,17 +67,12 @@ const GraphAuthPrompt = new Lang.Class({
 
 	begin_chauthtok: function () {
 		let err = 0;
-		
-		//Authenticate normal user before changing their password
-		let status = this.pam_auth.authenticate(err);
+	
+		let status = this.pam_auth.chauthtok(err);
 		if(status[0] == 1){
-			this.resp_text.set_text("Authenticated!");
-			status = this.pam_auth.chauthtok(err);
-			if(status[0] == 1){
-				this.resp_text.set_text("Authenticated!");
-			}else{
-				this.resp_text.set_text("Authentication Failed. Error code" + status.toString());
-		   }
+			this.resp_text.set_text("Changed authentication token!");
+		}else{
+			this.resp_text.set_text("Changing authentication token failed. Error code" + status.toString());
 	   }
 	}
 
